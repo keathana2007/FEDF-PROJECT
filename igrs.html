@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGRS - Integrated Grievance Redressal System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #0b0914;
+            --bg-card: #161224;
+            --bg-input: #1f1a33;
+            --primary: #8b5cf6;
+            --primary-hover: #a78bfa;
+            --accent: #d946ef;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #2e274a;
+            
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 260px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 3rem;
+            padding-left: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.85rem 1rem;
+            text-align: left;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary-hover);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Content Container */
+        main {
+            margin-left: 260px;
+            flex-grow: 1;
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        /* Modules View Toggle */
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Grid Framework */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* Cards & Containers */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* SLA Indicator inside Form */
+        .sla-info-box {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--primary-hover);
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background: var(--bg-input); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #12d393; }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-low { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-high { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+        .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-progress { background: rgba(139, 92, 246, 0.15); color: var(--primary-hover); }
+        .badge-resolved { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+        /* Dynamic Grievance Lists & Tables */
+        .g-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .g-item {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .g-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .g-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .g-item-title { font-weight: 600; font-size: 0.95rem; }
+        .g-item-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 10px; margin-top: 0.5rem; }
+
+        /* Admin Action Panel Controls */
+        .admin-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .resolution-log {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>IGRS Portal</span>
+        </div>
+        <nav class="nav-tabs">
+            <button class="nav-btn active" onclick="switchView('user-view', this)">
+                <i class="fa-solid fa-user"></i> User-Side Module
+            </button>
+            <button class="nav-btn" onclick="switchView('admin-view', this)">
+                <i class="fa-solid fa-user-gear"></i> Admin-Side Module
+            </button>
+        </nav>
+    </aside>
+
+    <main>
+        
+        <section id="user-view" class="view-section active">
+            <header>
+                <h1>User-Side Module</h1>
+                <p>Submit residential issues and monitor resolution transparency in real time.</p>
+            </header>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-pen-to-square"></i> Raise a Grievance</h2>
+                    <form id="grievanceForm" onsubmit="handleFormSubmit(event)">
+                        <div class="form-group">
+                            <label for="issueCategory">Issue Type (Department Routing)</label>
+                            <select id="issueCategory" class="form-control" onchange="updateSLAIndicator()" required>
+                                <option value="" disabled selected>Select residential issue...</option>
+                                <option value="Water Supply">Water Supply (Water Department)</option>
+                                <option value="Electricity">Electricity (Power Grid Corp)</option>
+                                <option value="Transport">Transport (Transit Authority)</option>
+                                <option value="Roads & Lights">Roads & Streetlights (Public Works)</option>
+                                <option value="Hygiene & Drainage">Hygiene & Drainage (Sanitation)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priority">Priority Level</label>
+                            <select id="priority" class="form-control" required>
+                                <option value="Low">Low - General Feedback / Non-Urgent</option>
+                                <option value="Medium" selected>Medium - Normal Disruptions</option>
+                                <option value="High">High - Critical / Outage / Safety Threat</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Residential Address / Block Location</label>
+                            <input type="text" id="location" class="form-control" placeholder="e.g. Block C, Avenue 4, Resident Lane" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Grievance Description</label>
+                            <textarea id="description" class="form-control" placeholder="Provide complete specifics regarding the issue..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Resolution Window (SLA Framework)</label>
+                            <div id="slaBox" class="sla-info-box">
+                                <i class="fa-solid fa-clock"></i> <span id="slaText">Please select an issue type to see the target SLA.</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> File Complaint</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fa-solid fa-clock-rotate-left"></i> Track Status & History</h2>
+                    <div class="g-list" id="userGrievanceList">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-view" class="view-section">
+            <header>
+                <h1>Admin-Side Module</h1>
+                <p>Manage infrastructure workflows, escalate pending tickers, and log programmatic remediation status.</p>
+            </header>
+
+            <div class="admin-controls">
+                <button class="btn btn-secondary" onclick="exportData('Excel')"><i class="fa-solid fa-file-excel"></i> Export Excel Report</button>
+                <button class="btn btn-secondary" onclick="exportData('PDF')"><i class="fa-solid fa-file-pdf"></i> Export Summary PDF</button>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-folder-open"></i> Incoming Control Pipeline</h2>
+                    <div class="g-list" id="adminGrievanceList">
+                        </div>
+                </div>
+
+                <div class="card" id="adminActionHub">
+                    <h2><i class="fa-solid fa-sliders"></i> Resolution Management</h2>
+                    <div id="hubPlaceholder" style="color: var(--text-muted); text-align: center; padding: 3rem 0;">
+                        <i class="fa-solid fa-hand-pointer" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Select an active complaint item from the control pipeline tracking grid to configure resolution settings.
+                    </div>
+                    
+                    <div id="hubControls" style="display: none;">
+                        <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1.5rem;">
+                            <h3 id="hubId" style="font-size: 1rem; margin-bottom: 0.25rem; color: var(--primary-hover);"></h3>
+                            <p id="hubCategory" style="font-weight: 600; margin-bottom: 0.5rem;"></p>
+                            <p id="hubDesc" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Escalation Workflow Route</label>
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: center; border-color: var(--danger); color: var(--danger);" onclick="triggerEscalation()">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Escalate to Higher Authority
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resolutionNotes">Resolution Notes & Diagnostic Action Log</label>
+                            <textarea id="resolutionNotes" class="form-control" placeholder="Document engineering metrics, field actions or tracking response taken..."></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                            <button class="btn btn-success" style="flex: 1;" onclick="updateStatus('Resolved')"><i class="fa-solid fa-check"></i> Mark Resolved</button>
+                            <button class="btn" style="flex: 1; background-color: #6366f1;" onclick="updateStatus('In Progress')"><i class="fa-solid fa-spinner"></i> In Progress</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Database Seed Array (Starting mock dataset structured around municipal infrastructure)
+        let grievances = [
+            {
+                id: "IGR-4091",
+                category: "Water Supply",
+                department: "Water Department",
+                priority: "High",
+                location: "Block A, Main Line",
+                description: "Main line rupture causing low pressure and sediment brown water entry to 40+ housing complexes.",
+                sla: "24 Hours",
+                status: "In Progress",
+                notes: "Dispatched maintenance crew to locate pipe breach point.",
+                history: ["Ticket initiated via User System.", "Routed to Water Department.", "Status modified to In Progress."]
+            },
+            {
+                id: "IGR-3982",
+                category: "Roads & Lights",
+                department: "Public Works",
+                priority: "Medium",
+                location: "Sector 4 Junction",
+                description: "Three consecutive streetlights are broken, creating a complete blind spot on the main turn.",
+                sla: "5 Days",
+                status: "Pending",
+                notes: "",
+                history: ["Ticket created and verified."]
+            }
+        ];
+
+        // System Configuration Map for SLAs
+        const slaConfig = {
+            "Water Supply": { dept: "Water Department", time: "24 Hours" },
+            "Electricity": { dept: "Power Grid Corp", time: "12 Hours" },
+            "Transport": { dept: "Transit Authority", time: "3 Days" },
+            "Roads & Lights": { dept: "Public Works", time: "5 Days" },
+            "Hygiene & Drainage": { dept: "Sanitation", time: "48 Hours" }
+        };
+
+        let activeSelectedAdminId = null;
+
+        // Init Lifecycle
+        document.addEventListener("DOMContentLoaded", () => {
+            renderLists();
+        });
+
+        // Tab View Router
+        function switchView(viewId, element) {
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Handle Dynamic Change updates in Form UX
+        function updateSLAIndicator() {
+            const val = document.getElementById('issueCategory').value;
+            const textSpan = document.getElementById('slaText');
+            if(slaConfig[val]) {
+                textSpan.innerText = `Routed to: [${slaConfig[val].dept}] — Operational SLA Target: ${slaConfig[val].time}`;
+            }
+        }
+
+        // Data Entry pipeline
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const cat = document.getElementById('issueCategory').value;
+            const priority = document.getElementById('priority').value;
+            const location = document.getElementById('location').value;
+            const desc = document.getElementById('description').value;
+            
+            const generatedId = `IGR-${Math.floor(1000 + Math.random() * 9000)}`;
+            
+            const newGrievance = {
+                id: generatedId,
+                category: cat,
+                department: slaConfig[cat].dept,
+                priority: priority,
+                location: location,
+                description: desc,
+                sla: slaConfig[cat].time,
+                status: "Pending",
+                notes: "",
+                history: ["Ticket raised by user through submission terminal."]
+            };
+            
+            grievances.unshift(newGrievance);
+            
+            // Clean up UI and render modifications
+            document.getElementById('grievanceForm').reset();
+            document.getElementById('slaText').innerText = "Please select an issue type to see the target SLA.";
+            alert(`Grievance Logged successfully! Track ID: ${generatedId}`);
+            
+            renderList
