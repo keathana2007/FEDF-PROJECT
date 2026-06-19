@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGRS - Residential Grievance Redressal System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Custom Purple & Deep Black Theme Overrides */
+        body {
+            background-color: #0b0712;
+            color: #e2e8f0;
+        }
+        .bg-dark-card {
+            background-color: #130d22;
+            border: 1px solid #2d1b4e;
+        }
+        .accent-purple {
+            color: #a855f7;
+        }
+        .bg-purple-gradient {
+            background: linear-gradient(135deg, #6b21a8 0%, #3b0764 100%);
+        }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-dark-card border-b border-purple-900/50 px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-purple-600 rounded-xl text-white shadow-md shadow-purple-500/20">
+                <i class="fa-solid fa-building-shield text-xl"></i>
+            </div>
+            <div>
+                <span class="text-xl font-bold tracking-wider text-white">IGRS</span>
+                <p class="text-xs text-purple-400 font-medium">Residential Grievance System</p>
+            </div>
+        </div>
+        <div class="flex bg-[#0b0712] p-1 rounded-xl border border-purple-900/60">
+            <button id="userViewBtn" onclick="switchView('user')" class="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-purple-600 text-white shadow-lg">
+                <i class="fa-solid fa-house-user mr-2"></i>Resident Portal
+            </button>
+            <button id="adminViewBtn" onclick="switchView('admin')" class="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 text-purple-300 hover:text-white ml-1">
+                <i class="fa-solid fa-user-gear mr-2"></i>Admin Panel
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-6 max-w-7xl w-full mx-auto">
+
+        <div id="userModule" class="space-y-8 animate-fadeIn">
+            <div class="bg-purple-gradient p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl text-white">
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Report & Track Maintenance Issues</h1>
+                <p class="text-purple-100 mt-2 max-w-xl text-sm leading-relaxed">
+                    Log society infrastructure complaints directly with the estate management team. Select the relevant utility category to trigger rapid technical dispatch.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 bg-dark-card rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 pb-4 mb-4 border-b border-purple-950">
+                            <i class="fa-solid fa-file-invoice text-purple-400 text-lg"></i>
+                            <h2 class="text-lg font-bold text-white">File Complaint Form</h2>
+                        </div>
+                        <form id="grievanceForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1.5">Resident Name</label>
+                                <input type="text" id="userName" required class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1.5">Flat / Villa / House No.</label>
+                                <input type="text" id="userId" placeholder="e.g., Block B, Flat 402" required class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1.5">Incident Category</label>
+                                    <select id="deptRouting" class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm">
+                                        <option value="Water Supply">Water Supply</option>
+                                        <option value="Electricity">Electricity</option>
+                                        <option value="Roads & Pathways">Roads & Pathways</option>
+                                        <option value="Street & Common Lights">Street & Common Lights</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1.5">Urgency Priority</label>
+                                    <select id="priorityLevel" onchange="updateFormSLA()" class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1.5">Describe the Problem</label>
+                                <textarea id="complaintText" rows="4" placeholder="Provide details like exact location, symptoms of the issue..." required class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm resize-none"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-950">
+                        <div class="bg-purple-950/40 border border-purple-800/40 rounded-xl p-3 flex items-center justify-between mb-4">
+                            <span class="text-xs text-purple-300"><i class="fa-solid fa-clock mr-2"></i>Expected Resolution SLA:</span>
+                            <span id="formSlaBadge" class="text-xs font-bold text-purple-400 bg-purple-900/50 px-2 py-1 rounded">12 Hours</span>
+                        </div>
+                        <button type="submit" form="grievanceForm" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-purple-600/10 flex justify-center items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Dispatch Ticket</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-dark-card rounded-2xl p-6 shadow-xl flex flex-col">
+                    <div class="flex justify-between items-center pb-4 mb-4 border-b border-purple-950">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-satellite-dish text-purple-400 text-lg"></i>
+                            <h2 class="text-lg font-bold text-white">Live Incident Tracker</h2>
+                        </div>
+                        <span class="text-xs text-purple-400 font-medium">Real-time status</span>
+                    </div>
+                    <div class="flex-grow overflow-y-auto max-h-[490px] pr-2 space-y-4" id="userTrackerList">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminModule" class="space-y-6 hidden animate-fadeIn">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-dark-card border border-purple-900/40 p-6 rounded-2xl gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-wide flex items-center">
+                        <i class="fa-solid fa-toolbox text-purple-500 mr-3"></i>Helpdesk Operations Console
+                    </h1>
+                    <p class="text-xs text-purple-400 mt-1">Deploy contractors, escalate critical utility breakdowns, log operations steps, and output legal/financial maintenance audits.</p>
+                </div>
+                <div class="flex items-center space-x-3 self-end md:self-auto">
+                    <span class="text-xs font-bold text-purple-300 uppercase tracking-wider hidden sm:inline">Export Metrics:</span>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-colors flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i> <span>Excel Sheet</span>
+                    </button>
+                    <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-colors flex items-center space-x-2">
+                        <i class="fa-solid fa-file-pdf"></i> <span>PDF Dossier</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-dark-card rounded-2xl shadow-xl border border-purple-900/40 overflow-hidden">
+                <div class="px-6 py-4 border-b border-purple-950 flex items-center justify-between bg-[#171029]">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-purple-300">Active Incident Operational Queue</h3>
+                    <span id="queueCount" class="bg-purple-900/60 border border-purple-700 text-purple-300 px-2.5 py-0.5 rounded-full font-bold text-xs">0 Tickets</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#0f0a1c] border-b border-purple-950 text-xs text-purple-400 font-bold uppercase tracking-wider">
+                                <th class="py-4 px-6">Ticket & Unit</th>
+                                <th class="py-4 px-6">Utility Target</th>
+                                <th class="py-4 px-6">Problem Breakdown</th>
+                                <th class="py-4 px-6 text-center">Urgency</th>
+                                <th class="py-4 px-6 text-center">Status</th>
+                                <th class="py-4 px-6 text-right">Deployment Workflow</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminQueueTable" class="divide-y divide-purple-950/40 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark-card border-t border-purple-900/30 text-center py-4 mt-12">
+        <p class="text-xs text-purple-500 font-medium">IGRS &copy; 2026 Residential Infrastructure Management Systems | Active Engine</p>
+    </footer>
+
+    <div id="actionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-dark-card border border-purple-800 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-scaleUp">
+            <div class="bg-purple-gradient px-6 py-4 flex justify-between items-center">
+                <h3 class="text-md font-bold text-white flex items-center"><i class="fa-solid fa-truck-ramp-box mr-2"></i>Update Field Dispatch Details</h3>
+                <button onclick="closeModal()" class="text-purple-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="modalTicketId">
+                <div>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">Reported Issue Summary</span>
+                    <p id="modalDesc" class="bg-[#0b0712] p-3 rounded-xl text-xs text-slate-300 border border-purple-950 max-h-24 overflow-y-auto"></p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-purple-400 mb-1.5">Operational Status</label>
+                        <select id="modalStatus" class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500 text-xs font-semibold">
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="triggerEscalation()" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-600/40 font-bold py-2 px-3 rounded-xl text-xs transition-colors flex justify-center items-center space-x-1.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i> <span>Escalate to Municipal</span>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-purple-400 mb-1.5">Technician / Contractor Work Logs</label>
+                    <textarea id="modalNotes" rows="3" placeholder="Log contractor actions, replaced materials, plumbing/electrical fixes..." class="w-full bg-[#0b0712] border border-purple-900/60 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-purple-500 text-xs resize-none"></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-[#0f0a1c] border-t border-purple-950 flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-4 py-2 border border-purple-900 rounded-xl text-xs font-medium text-purple-300 hover:text-white transition-colors">Cancel</button>
+                <button onclick="saveAdminAction()" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md shadow-purple-600/20 transition-all">Save Activity Ledger</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Mock Database Structure geared towards Residential Incidents
+        const defaultGrievances = [
+            {
+                id: "INC-4029",
+                name: "Rohan Sharma",
+                roll: "Villa 42, Avenue 3",
+                dept: "Water Supply",
+                priority: "High",
+                desc: "Main inlet pipeline showing major crack. Heavy pressure loss and water contamination observed in the storage tank.",
+                status: "In Progress",
+                sla: "4 Hours",
+                notes: "Plumbing squad deployed to isolate the cracked line and install replacement sleeves.",
+                history: ["Incident logged by Resident", "Assigned to Community Plumbing Core Squad", "Status updated to In Progress"]
+            },
+            {
+                id: "INC-1182",
+                name: "Ananya Rao",
+                roll: "Block C, Apt 104",
+                dept: "Street & Common Lights",
+                priority: "Low",
+                desc: "The third street light pole opposite the park entrance has been flickering constantly since last night.",
+                status: "Pending",
+                sla: "24 Hours",
+                notes: "",
+                history: ["Incident logged by Resident", "Routed to Electrical Operations Inventory Pool"]
+            }
+        ];
+
+        // Core App Initialization
+        let state = JSON.parse(localStorage.getItem('igrs_residential_state')) || defaultGrievances;
+
+        function updateStorage() {
+            localStorage.setItem('igrs_residential_state', JSON.stringify(state));
+            renderUserTracker();
+            renderAdminQueue();
+        }
+
+        // View Switching Logic
+        function switchView(target) {
+            const userBtn = document.getElementById('userViewBtn');
+            const adminBtn = document.getElementById('adminViewBtn');
+            const userMod = document.getElementById('userModule');
+            const adminMod = document.getElementById('adminModule');
+
+            if (target === 'user') {
+                userBtn.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-purple-600 text-white shadow-lg";
+                adminBtn.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 text-purple-300 hover:text-white ml-1";
+                userMod.classList.remove('hidden');
+                adminMod.classList.add('hidden');
+            } else {
+                adminBtn.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-purple-600 text-white shadow-lg";
+                userBtn.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 text-purple-300 hover:text-white ml-1";
+                adminMod.classList.remove('hidden');
+                userMod.classList.add('hidden');
+            }
+        }
+
+        // User Side View: Dynamic SLA calculation based on Priority Input
+        function updateFormSLA() {
+            const priority = document.getElementById('priorityLevel').value;
+            const badge = document.getElementById('formSlaBadge');
+            if (priority === 'High') { badge.innerText = "4 Hours"; badge.className = "text-xs font-bold text-rose-400 bg-rose-950/50 px-2 py-1 rounded"; }
+            else if (priority === 'Medium') { badge.innerText = "12 Hours"; badge.className = "text-xs font-bold text-amber-400 bg-amber-
